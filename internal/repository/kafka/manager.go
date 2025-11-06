@@ -1,10 +1,12 @@
 package kafka
 
 import (
-    "context"
-    "github.com/segmentio/kafka-go"
+	"context"
+	"encoding/json"
+	"time"
+
 	"github.com/Hirogava/multibank-helper/internal/config/logger"
-    "time"
+	"github.com/segmentio/kafka-go"
 )
 
 type KafkaManager struct {
@@ -39,10 +41,15 @@ func NewKafkaManager(brokers []string, topic, groupID string) *KafkaManager {
     }
 }
 
-func (km *KafkaManager) SendMessage(ctx context.Context, key, value string) error {
+func (km *KafkaManager) SendMessage(ctx context.Context, key string, value interface{}) error {
+    data, err := json.Marshal(value)
+    if err != nil {
+        return err
+    }
+
     msg := kafka.Message{
         Key:   []byte(key),
-        Value: []byte(value),
+        Value: []byte(data),
         Time:  time.Now(),
     }
 
